@@ -15,7 +15,7 @@
 1.0.0 - Initial release - all you need is "using Microsoft.Azure.Documents.Client;" to use the extensions on DocumentClient.
     </releaseNotes>
     <copyright>Copyright 2017 Adam Craven</copyright>
-    <tags>Azure,Cosmos DB,DocumentDB</tags>
+    <tags>Azure,CosmosDB,DocumentDB</tags>
     <dependencies>
       <dependency id="Microsoft.Azure.DocumentDB" version="1.14.0" />
       <dependency id="Microsoft.Extensions.Logging.Abstractions" version="1.1.1" />
