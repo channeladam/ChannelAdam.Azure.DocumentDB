@@ -1,0 +1,30 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>ChannelAdam.Azure.DocumentDB</id>
+    <version>1.0.0</version>
+    <title>ChannelAdam Azure DocumentDB Client Library</title>
+    <authors>Adam Craven</authors>
+    <owners>Adam Craven</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>https://github.com/channeladam/ChannelAdam.Azure.DocumentDB</projectUrl>
+    <iconUrl>https://devzone.channeladam.com/img/channeladam/channeladam-logo.png</iconUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>Extensions for the Microsoft Azure DocumentDB library.</description>
+    <releaseNotes>
+1.0.0 - Initial release - all you need is "using Microsoft.Azure.Documents.Client;" to use the extensions on DocumentClient.
+    </releaseNotes>
+    <copyright>Copyright 2017 Adam Craven</copyright>
+    <tags>Azure,Cosmos DB,DocumentDB</tags>
+    <dependencies>
+      <dependency id="Microsoft.Azure.DocumentDB" version="1.14.0" />
+      <dependency id="Microsoft.Extensions.Logging.Abstractions" version="1.1.1" />
+      <dependency id="Newtonsoft.Json" version="9.0.1" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\ChannelAdam.Azure.DocumentDB.dll" target="lib\net45" />
+    <file src="bin\Release\ChannelAdam.Azure.DocumentDB.pdb" target="lib\net45" />
+    <file src="**\*.cs" exclude="obj\**\*;bin\**\*" target="src" />
+  </files>
+</package>
