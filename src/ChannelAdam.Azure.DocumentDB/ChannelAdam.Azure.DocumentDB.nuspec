@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>ChannelAdam.Azure.DocumentDB</id>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <title>ChannelAdam Azure DocumentDB Client Library</title>
     <authors>Adam Craven</authors>
     <owners>Adam Craven</owners>
@@ -12,6 +12,7 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>Extensions for the Microsoft Azure DocumentDB library.</description>
     <releaseNotes>
+1.2.0 - Fixed regression on UpsertDocumentsIndividuallyAsync().
 1.1.0 - Added optimistic lock version of Replace.
 1.0.0 - Initial release - all you need is "using Microsoft.Azure.Documents.Client;" to use the extensions on DocumentClient.
     </releaseNotes>

@@ -291,7 +291,7 @@ namespace Microsoft.Azure.Documents.Client
         {
             return TryReplaceDocumentAsync(client, UriFactory.CreateDocumentUri(databaseId, collectionId, documentId), document, requestOptions, logger);
         }
-        
+
         /// <summary>
         /// Try to replace the document.
         /// </summary>
@@ -316,7 +316,7 @@ namespace Microsoft.Azure.Documents.Client
 
             return result;
         }
-         
+
         /// <summary>
         /// Upsert the given document.
         /// </summary>
@@ -336,6 +336,7 @@ namespace Microsoft.Azure.Documents.Client
         /// <summary>
         /// Upsert the given collection of documents individually.
         /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
         /// <param name="client"></param>
         /// <param name="databaseId"></param>
         /// <param name="collectionId"></param>
@@ -347,7 +348,7 @@ namespace Microsoft.Azure.Documents.Client
         /// Beware of the cost and speed of using this client approach (which has the client calling the database once per document)
         ///     - as opposed to making one call to a stored procedure to upsert a batch of documents via one server operation.
         /// </remarks>
-        public static async Task<ICollection<ResourceResponse<Document>>> UpsertDocumentsIndividuallyAsync(this DocumentClient client, string databaseId, string collectionId, ICollection<object> documents, RequestOptions requestOptions = null, bool disableAutomaticIdGeneration = false)
+        public static async Task<ICollection<ResourceResponse<Document>>> UpsertDocumentsIndividuallyAsync<TDocument>(this DocumentClient client, string databaseId, string collectionId, ICollection<TDocument> documents, RequestOptions requestOptions = null, bool disableAutomaticIdGeneration = false)
         {
             var result = new List<ResourceResponse<Document>>();
             var collectionUri = UriFactory.CreateDocumentCollectionUri(databaseId, collectionId);
