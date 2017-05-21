@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>ChannelAdam.Azure.DocumentDB</id>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <title>ChannelAdam Azure DocumentDB Client Library</title>
     <authors>Adam Craven</authors>
     <owners>Adam Craven</owners>
