@@ -21,7 +21,7 @@ using System.Runtime.Serialization;
 namespace ChannelAdam.Azure.DocumentDB
 {
     [Serializable]
-    internal class OptimisticLockException : Exception
+    public class OptimisticLockException : Exception
     {
         public OptimisticLockException()
         {
