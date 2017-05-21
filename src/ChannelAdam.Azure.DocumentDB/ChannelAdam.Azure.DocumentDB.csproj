@@ -60,8 +60,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DocumentOptimisticLockException.cs" />
     <Compile Include="Extensions\DocumentClientExtensions.cs" />
-    <Compile Include="OptimisticLockException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

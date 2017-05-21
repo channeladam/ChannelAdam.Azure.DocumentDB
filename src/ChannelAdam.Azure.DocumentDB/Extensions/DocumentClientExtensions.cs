@@ -202,7 +202,7 @@ namespace Microsoft.Azure.Documents.Client
         /// <param name="requestOptions"></param>
         /// <param name="logger"></param>
         /// <returns>Null if the replace failed because the document did not already exist.</returns>
-        /// <exception cref="OptimisticLockException"></exception>
+        /// <exception cref="DocumentOptimisticLockException"></exception>
         public static Task<ResourceResponse<Document>> TryReplaceDocumentWithOptimisticLockingAsync(this DocumentClient client, Document document, RequestOptions requestOptions = null, ILogger logger = null)
         {
             requestOptions = requestOptions ?? new RequestOptions();
@@ -216,7 +216,7 @@ namespace Microsoft.Azure.Documents.Client
             {
                 string error = $"Optimistic locking error occurred while replacing document '{document.SelfLink}'. Expected eTag {document.ETag}.";
                 logger?.LogTrace(error);
-                throw new OptimisticLockException(error, dcex);
+                throw new DocumentOptimisticLockException(error, document, dcex);
             }
         }
 
@@ -232,7 +232,7 @@ namespace Microsoft.Azure.Documents.Client
         /// <param name="requestOptions"></param>
         /// <param name="logger"></param>
         /// <returns>Null if the replace failed because the document did not already exist.</returns>
-        /// <exception cref="OptimisticLockException"></exception>
+        /// <exception cref="DocumentOptimisticLockException"></exception>
         public static Task<ResourceResponse<Document>> TryReplaceDocumentWithOptimisticLockingAsync(this DocumentClient client, string databaseId, string collectionId, string documentId, string eTag, object document, RequestOptions requestOptions = null, ILogger logger = null)
         {
             requestOptions = requestOptions ?? new RequestOptions();
@@ -248,7 +248,7 @@ namespace Microsoft.Azure.Documents.Client
             {
                 string error = $"Optimistic locking error occurred while replacing document '{documentUri.OriginalString}'. Expected eTag {eTag}.";
                 logger?.LogTrace(error);
-                throw new OptimisticLockException(error, dcex);
+                throw new DocumentOptimisticLockException(error, documentUri.OriginalString, eTag, document, dcex);
             }
         }
 
