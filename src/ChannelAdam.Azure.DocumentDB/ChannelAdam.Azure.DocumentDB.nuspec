@@ -12,6 +12,7 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>Extensions for the Microsoft Azure DocumentDB library.</description>
     <releaseNotes>
+1.1.0 - Added optimistic lock version of Replace.
 1.0.0 - Initial release - all you need is "using Microsoft.Azure.Documents.Client;" to use the extensions on DocumentClient.
     </releaseNotes>
     <copyright>Copyright 2017 Adam Craven</copyright>

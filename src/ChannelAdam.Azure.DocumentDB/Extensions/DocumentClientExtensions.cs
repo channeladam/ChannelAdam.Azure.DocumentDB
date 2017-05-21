@@ -15,6 +15,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using ChannelAdam.Azure.DocumentDB;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -131,7 +132,6 @@ namespace Microsoft.Azure.Documents.Client
         /// <summary>
         /// Try to create the document.
         /// </summary>
-        /// <typeparam name="TDocument"></typeparam>
         /// <param name="client"></param>
         /// <param name="collectionUri"></param>
         /// <param name="document"></param>
@@ -195,15 +195,72 @@ namespace Microsoft.Azure.Documents.Client
         }
 
         /// <summary>
-        /// Try to replace the document.
+        /// Try to replace the document, using optimistic locking on the document's eTag.
         /// </summary>
-        /// <typeparam name="TDocument"></typeparam>
         /// <param name="client"></param>
         /// <param name="document"></param>
         /// <param name="requestOptions"></param>
         /// <param name="logger"></param>
-        /// <returns>Null if the delete failed because the document did not already exist.</returns>
-        public static async Task<ResourceResponse<Document>> TryReplaceDocumentAsync<TDocument>(this DocumentClient client, TDocument document, RequestOptions requestOptions = null, ILogger logger = null) where TDocument : Document
+        /// <returns>Null if the replace failed because the document did not already exist.</returns>
+        /// <exception cref="OptimisticLockException"></exception>
+        public static Task<ResourceResponse<Document>> TryReplaceDocumentWithOptimisticLockingAsync(this DocumentClient client, Document document, RequestOptions requestOptions = null, ILogger logger = null)
+        {
+            requestOptions = requestOptions ?? new RequestOptions();
+            requestOptions.AccessCondition = new AccessCondition { Condition = document.ETag, Type = AccessConditionType.IfMatch };
+
+            try
+            {
+                return TryReplaceDocumentAsync(client, document, requestOptions, logger);
+            }
+            catch (DocumentClientException dcex) when (dcex.StatusCode == HttpStatusCode.PreconditionFailed)
+            {
+                string error = $"Optimistic locking error occurred while replacing document '{document.SelfLink}'. Expected eTag {document.ETag}.";
+                logger?.LogTrace(error);
+                throw new OptimisticLockException(error, dcex);
+            }
+        }
+
+        /// <summary>
+        /// Try to replace the document, using optimistic locking with the given eTag.
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="databaseId"></param>
+        /// <param name="collectionId"></param>
+        /// <param name="documentId"></param>
+        /// <param name="eTag"></param>
+        /// <param name="document"></param>
+        /// <param name="requestOptions"></param>
+        /// <param name="logger"></param>
+        /// <returns>Null if the replace failed because the document did not already exist.</returns>
+        /// <exception cref="OptimisticLockException"></exception>
+        public static Task<ResourceResponse<Document>> TryReplaceDocumentWithOptimisticLockingAsync(this DocumentClient client, string databaseId, string collectionId, string documentId, string eTag, object document, RequestOptions requestOptions = null, ILogger logger = null)
+        {
+            requestOptions = requestOptions ?? new RequestOptions();
+            requestOptions.AccessCondition = new AccessCondition { Condition = eTag, Type = AccessConditionType.IfMatch };
+
+            var documentUri = UriFactory.CreateDocumentUri(databaseId, collectionId, documentId);
+
+            try
+            {
+                return TryReplaceDocumentAsync(client, documentUri, document, requestOptions, logger);
+            }
+            catch (DocumentClientException dcex) when (dcex.StatusCode == HttpStatusCode.PreconditionFailed)
+            {
+                string error = $"Optimistic locking error occurred while replacing document '{documentUri.OriginalString}'. Expected eTag {eTag}.";
+                logger?.LogTrace(error);
+                throw new OptimisticLockException(error, dcex);
+            }
+        }
+
+        /// <summary>
+        /// Try to replace the document.
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="document"></param>
+        /// <param name="requestOptions"></param>
+        /// <param name="logger"></param>
+        /// <returns>Null if the replace failed because the document did not already exist.</returns>
+        public static async Task<ResourceResponse<Document>> TryReplaceDocumentAsync(this DocumentClient client, Document document, RequestOptions requestOptions = null, ILogger logger = null)
         {
             ResourceResponse<Document> result = null;
 
@@ -213,16 +270,56 @@ namespace Microsoft.Azure.Documents.Client
             }
             catch (DocumentClientException dcex) when (dcex.StatusCode == HttpStatusCode.NotFound)
             {
-                logger?.LogTrace($"Document '{document.Id}' does not exist - so it cannot be replaced");
+                logger?.LogTrace($"Document '{document.SelfLink}' does not exist - so it cannot be replaced");
             }
 
             return result;
         }
 
         /// <summary>
+        /// Try to replace the document.
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="databaseId"></param>
+        /// <param name="collectionId"></param>
+        /// <param name="documentId"></param>
+        /// <param name="document"></param>
+        /// <param name="requestOptions"></param>
+        /// <param name="logger"></param>
+        /// <returns>Null if the replace failed because the document did not already exist.</returns>
+        public static Task<ResourceResponse<Document>> TryReplaceDocumentAsync(this DocumentClient client, string databaseId, string collectionId, string documentId, object document, RequestOptions requestOptions = null, ILogger logger = null)
+        {
+            return TryReplaceDocumentAsync(client, UriFactory.CreateDocumentUri(databaseId, collectionId, documentId), document, requestOptions, logger);
+        }
+        
+        /// <summary>
+        /// Try to replace the document.
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="documentUri"></param>
+        /// <param name="document"></param>
+        /// <param name="requestOptions"></param>
+        /// <param name="logger"></param>
+        /// <returns>Null if the replace failed because the document did not already exist.</returns>
+        public static async Task<ResourceResponse<Document>> TryReplaceDocumentAsync(this DocumentClient client, Uri documentUri, object document, RequestOptions requestOptions = null, ILogger logger = null)
+        {
+            ResourceResponse<Document> result = null;
+
+            try
+            {
+                result = await client.ReplaceDocumentAsync(documentUri, document, requestOptions).ConfigureAwait(false);
+            }
+            catch (DocumentClientException dcex) when (dcex.StatusCode == HttpStatusCode.NotFound)
+            {
+                logger?.LogTrace($"Document '{documentUri.OriginalString}' does not exist - so it cannot be replaced");
+            }
+
+            return result;
+        }
+         
+        /// <summary>
         /// Upsert the given document.
         /// </summary>
-        /// <typeparam name="TDocument"></typeparam>
         /// <param name="client"></param>
         /// <param name="databaseId"></param>
         /// <param name="collectionId"></param>
@@ -239,7 +336,6 @@ namespace Microsoft.Azure.Documents.Client
         /// <summary>
         /// Upsert the given collection of documents individually.
         /// </summary>
-        /// <typeparam name="TDocument"></typeparam>
         /// <param name="client"></param>
         /// <param name="databaseId"></param>
         /// <param name="collectionId"></param>
@@ -251,13 +347,13 @@ namespace Microsoft.Azure.Documents.Client
         /// Beware of the cost and speed of using this client approach (which has the client calling the database once per document)
         ///     - as opposed to making one call to a stored procedure to upsert a batch of documents via one server operation.
         /// </remarks>
-        public static async Task<ICollection<ResourceResponse<Document>>> UpsertDocumentsIndividuallyAsync<TDocument>(this DocumentClient client, string databaseId, string collectionId, ICollection<TDocument> documents, RequestOptions requestOptions = null, bool disableAutomaticIdGeneration = false) where TDocument : Document
+        public static async Task<ICollection<ResourceResponse<Document>>> UpsertDocumentsIndividuallyAsync(this DocumentClient client, string databaseId, string collectionId, ICollection<object> documents, RequestOptions requestOptions = null, bool disableAutomaticIdGeneration = false)
         {
             var result = new List<ResourceResponse<Document>>();
+            var collectionUri = UriFactory.CreateDocumentCollectionUri(databaseId, collectionId);
 
             foreach (var document in documents)
             {
-                var collectionUri = UriFactory.CreateDocumentCollectionUri(databaseId, collectionId);
                 result.Add(await client.UpsertDocumentAsync(collectionUri, document, requestOptions, disableAutomaticIdGeneration).ConfigureAwait(false));
             }
 
